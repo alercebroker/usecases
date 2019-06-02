@@ -16,4 +16,4 @@ In this repository we show how to access the ALeRCE ZTF database, focused on dif
 
 ## How can I contribute?
 
-The success of ALeRCE depends on being able to build a community of users which can connect LSST with the different follow up resources. Therefore, we are really happy to receieve and publish contributed notebooks in this repository showing how your science case can benefit from having a real-time access to an annotated and classified database of ZTF alerts. Please feel free to join this repository and add your science cases!
+The success of ALeRCE depends on being able to build a community of users which can connect LSST with the different follow up resources. Therefore, we are very happy to receive and publish contributed notebooks in this repository showing how your science case can benefit from having a real-time access to an annotated and classified database of ZTF alerts. Please feel free to join this repository and add your science cases!

@@ -1,10 +1,11 @@
 <img src="http://alerce.science/wp-content/uploads/2017/08/CM-768x302.png" width="300">
 
+See more information about the ALeRCE broker, including its frontend, in [http://alerce.science/](http://alerce.science/)
+
+
 # ALeRCE use cases
 
 A collection of jupyter notebooks and scripts on how to access the ALeRCE database, API, etc.
-
-See more information about the ALeRCE broker, including its frontend, in [http://alerce.science/](http://alerce.science/)
 
 ## Context
 

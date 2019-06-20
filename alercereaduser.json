@@ -1,0 +1,8 @@
+{
+    "params" : {
+        "dbname" : "ztf",
+        "user" : "alerceread",
+        "host": "psql.alerce.online",
+        "password" : "alerce2019"
+    }
+}

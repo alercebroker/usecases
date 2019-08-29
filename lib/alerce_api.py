@@ -1,8 +1,13 @@
 import requests
+from xml.etree import ElementTree
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from pandas.io.json import json_normalize
 from IPython.display import HTML
+from io import BytesIO
+from PIL import Image
+import base64
 
 # class which uses the API via python
 class alerce_api(object):

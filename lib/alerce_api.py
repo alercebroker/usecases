@@ -1,20 +1,20 @@
 import requests
-from xml.etree import ElementTree
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from pandas.io.json import json_normalize
 from IPython.display import HTML
-from io import BytesIO
-from PIL import Image
-import base64
+#from xml.etree import ElementTree
+#import numpy as np
+#from io import BytesIO
+#from PIL import Image
+#import base64
 
-# class which uses the API via python
+
 class alerce_api(object):
+    'ALeRCE API python wrapper class'
     
-    # defines 
+    # init
     def __init__(self, **kwargs):
-        
+                
         self.ztf_url = "http://ztf.alerce.online"
         if "ztf_url" in kwargs.keys():
             self.ztf_url = kwargs["ztf_url"]
@@ -26,8 +26,8 @@ class alerce_api(object):
         self.oid = ""
 
 
-    # do general query as dataframe
     def query(self, params):
+        'do general query given json query parameters'
         
         # show api results
         r = requests.post(url = "%s/query" % self.ztf_url, json = params) 
@@ -36,14 +36,14 @@ class alerce_api(object):
         query_results.set_index('oid', inplace=True)
         return query_results
 
-    # get sql from query
     def get_sql(self, params):
+        'get sql from given json query parameters'
         
         r = requests.post(url = "%s/get_sql" % self.ztf_url, json = params)
         return r.content
 
-    # get detections as dataframe
     def get_detections(self, oid):
+        'get detections given oid as pandas dataframe'
         
         #oid
         params = {
@@ -57,8 +57,9 @@ class alerce_api(object):
         detections.set_index('candid', inplace=True)
         return detections
 
-    # get non detections as dataframe
+    
     def get_non_detections(self, oid):
+        '# get non detections given oid as pandas  dataframe'
         
         #oid
         params = {
@@ -73,8 +74,8 @@ class alerce_api(object):
             non_detections.set_index('mjd', inplace=True)
         return non_detections
 
-    # get stats as dataframe
     def get_stats(self, oid, verbose=False):
+        'get stats given oid as pandas dataframe'
         
         #oid
         params = {
@@ -97,8 +98,8 @@ class alerce_api(object):
         
         return stats
 
-    # get probabilities as dataframe (late or early)
     def get_probabilities(self, oid, dolate=True):
+        'get probabilities given oid as pandas dataframe (late or early)'
         
         #oid
         params = {
@@ -116,8 +117,8 @@ class alerce_api(object):
         else:
             return early
 
-    # get features as dataframe
     def get_features(self, oid):
+        'get features given oid as pandas dataframe'
     
         #oid
         params = {
@@ -130,8 +131,8 @@ class alerce_api(object):
         features.set_index('oid', inplace=True)
         return features
     
-    # gets catsHTM crossmatch
     def catsHTM(self, oid, catalog_name, radius):
+        'get catsHTM crossmatch given oid, catalog_name (all is also allowed) and search radius in arcsec'
         
         # get ra, dec
         if oid != self.oid:
@@ -149,9 +150,9 @@ class alerce_api(object):
             r = requests.get(url = "%s/crossmatch_all" % self.catsHTM_url, params = params)
         return r.json()
 
-    # get redshift from catsHTM crossmatch
     def catsHTM_redshift(self, oid, radius):
-        
+        'get redshift given oid using catsHTM crossmatch'
+
         # get ra, dec
         if oid != self.oid:
             self.get_stats(oid)
@@ -177,8 +178,8 @@ class alerce_api(object):
                     
         return
 
-    # plot stamp in a notebook
     def plot_stamp(self, oid, candid=None):
+        'plot stamp in a notebook given oid. It uses IPython HTML.'
         
         # if candid is None, get minimum candid
         if candid is None:

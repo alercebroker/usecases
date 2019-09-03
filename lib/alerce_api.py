@@ -2,12 +2,21 @@ import requests
 import pandas as pd
 from pandas.io.json import json_normalize
 from IPython.display import HTML
+from astropy.table import Table, Column
 #from xml.etree import ElementTree
 #import numpy as np
 #from io import BytesIO
 #from PIL import Image
 #import base64
 
+class AlerceParseError(Exception):
+    pass
+
+class AlerceOidError(Exception):
+    pass
+
+class AlerceOidError(Exception):
+    pass
 
 class alerce_api(object):
     'ALeRCE API python wrapper class'
@@ -19,7 +28,7 @@ class alerce_api(object):
         if "ztf_url" in kwargs.keys():
             self.ztf_url = kwargs["ztf_url"]
             
-        self.catsHTM_url = "http://catshtm.alerce.online:5000"
+        self.catsHTM_url = "http://catshtm.alerce.online"
         if "catsHTM_url" in kwargs.keys():
             self.catsHTM_url = kwargs["catsHTM_url"]
             
@@ -27,7 +36,58 @@ class alerce_api(object):
 
 
     def query(self, params):
-        'do general query given json query parameters'
+        """Query the ALeRCE API to get matching objects into a pandas dataframe.
+
+        The current fields to query the db are the following:
+
+        {
+        total: number (if not set the total is counted and the query is slower),
+        records_per_pages: number (default 20),
+        page: number (default 1),
+        sortBy: string columnName (default nobs),
+        query_parameters:{
+           filters:{
+              //ZTF Object id
+              oid: "ZTFXXXXXX",
+              //Number of detections
+              nobs: { 
+                  min: int
+                  max: int
+              },
+              //Late Classifier (Random Forest)
+              classrf: ["CEPH","DSCT","EB","LPV","RRL","SNe","Other"] or int,
+              pclassrf: float [0-1],
+              //Early Classifier (Stamp Classifier)
+              classearly: ["AGN","SN","VS","asteroid","bogus"] or int,
+              pclassearly: float [0-1],
+              },
+              //Coordinate based search (RA,DEC) and Search Radius.
+              coordinates:{
+                ra: float degrees,
+                dec: float degrees,
+                sr: float degrese
+                },
+              dates:{
+              //First detection (Discovery date)
+              firstmjd: {
+                 min: float mjd,
+                 max: float mjd
+                }
+              }
+           }
+        }
+        The response contains the following columns in a pandas dataframe:
+        
+        {
+        "total": int,
+        "num_pages": int,
+        "page": int,
+        "result": {
+           <ObjectId>: <ObjectStats>
+           }
+        }
+
+"""
         
         # show api results
         r = requests.post(url = "%s/query" % self.ztf_url, json = params) 
@@ -54,6 +114,7 @@ class alerce_api(object):
         r = requests.post(url = "%s/get_detections" % self.ztf_url, json = params) 
         df = pd.DataFrame(r.json())
         detections = json_normalize(df.result.detections)
+        detections.sort_values(by=['mjd'], inplace=True)
         detections.set_index('candid', inplace=True)
         return detections
 
@@ -67,10 +128,14 @@ class alerce_api(object):
         }
         
         # show api results
-        r = requests.post(url = "%s/get_non_detections" % self.ztf_url, json = params) 
-        df = pd.DataFrame(r.json())
+        r = requests.post(url = "%s/get_non_detections" % self.ztf_url, json = params)
+        try:
+            df = pd.DataFrame(r.json())
+        except AlerceParseError:
+            print("ERROR (get_non_detections): could not convert API output to dataframe")
         non_detections = json_normalize(df.result.non_detections)
         if non_detections.shape[0] > 0:
+            non_detections.sort_values(by=['mjd'], inplace=True)
             non_detections.set_index('mjd', inplace=True)
         return non_detections
 
@@ -83,8 +148,13 @@ class alerce_api(object):
         }
         
         # show api results
-        r = requests.post(url = "%s/get_stats" % self.ztf_url, json = params) 
-        df = pd.DataFrame(r.json())
+        r = requests.post(url = "%s/get_stats" % self.ztf_url, json = params)
+
+        try:
+            df = pd.DataFrame(r.json())
+        except AlerceParseError:
+            print("ERROR (get_non_detections): could not convert API output to dataframe")
+        
         stats = json_normalize(df.result.stats)
         stats.set_index('oid', inplace=True)
         
@@ -98,7 +168,7 @@ class alerce_api(object):
         
         return stats
 
-    def get_probabilities(self, oid, dolate=True):
+    def get_probabilities(self, oid, doearly=True, dolate=True):
         'get probabilities given oid as pandas dataframe (late or early)'
         
         #oid
@@ -107,15 +177,30 @@ class alerce_api(object):
         }
         
         # show api results
-        r = requests.post(url = "%s/get_probabilities" % self.ztf_url, json = params) 
-        early = json_normalize(r.json()["result"]["probabilities"]["early_classifier"])
-        early.set_index("oid", inplace=True)
+        r = requests.post(url = "%s/get_probabilities" % self.ztf_url, json = params)
+
+        if doearly:
+            try:
+                early = json_normalize(r.json()["result"]["probabilities"]["early_classifier"])
+                early.set_index("oid", inplace=True)
+            except AlerceParseError:
+                print("ERROR (get_probabilities): could not convert early probabilities API output to dataframe")
+            
         if dolate:
-            late = json_normalize(r.json()["result"]["probabilities"]["random_forest"])
-            late.set_index("oid", inplace=True)
-            return early, late
-        else:
-            return early
+            try:
+                late = json_normalize(r.json()["result"]["probabilities"]["random_forest"])
+                late.set_index("oid", inplace=True)
+                return early, late
+            except AlerceParseError:
+                print("ERROR (get_probabilities): could not convert early probabilities API output to dataframe")
+
+        result = {}
+        if doearly:
+            result["early_probabilities"] = early
+        if dolate:
+            result["late_probabilities"] = early
+
+        return result
 
     def get_features(self, oid):
         'get features given oid as pandas dataframe'
@@ -131,7 +216,7 @@ class alerce_api(object):
         features.set_index('oid', inplace=True)
         return features
     
-    def catsHTM(self, oid, catalog_name, radius):
+    def catsHTM_conesearch(self, oid, catalog_name, radius):
         'get catsHTM crossmatch given oid, catalog_name (all is also allowed) and search radius in arcsec'
         
         # get ra, dec
@@ -145,10 +230,33 @@ class alerce_api(object):
             "radius": "%f" % radius
         }
         if catalog_name != "all":
-            r = requests.get(url = "%s/crossmatch" % self.catsHTM_url, params = params)
+            result = requests.get(url = "%s/conesearch" % self.catsHTM_url, params = params)
         else:
-            r = requests.get(url = "%s/crossmatch_all" % self.catsHTM_url, params = params)
-        return r.json()
+            result = requests.get(url = "%s/conesearch_all" % self.catsHTM_url, params = params)
+        
+        votables = {}
+
+        try:
+            if "catalogs" not in result.json().keys():
+                return
+        except:
+            return
+        
+        for idx, r in enumerate(result.json()["catalogs"]):
+
+            key = list(r.keys())[0]
+            if r[key] == {}:
+                continue
+            t = Table()
+            for field in r[key].keys():
+                data = r[key][field]['values'] #list(map(lambda x: x["value"], r[key][field]))
+                t.add_column(Column(data, name=field))
+                t[field].unit = r[key][field]['units']
+            t["cat_name"] = Column(["catsHTM_%s" % key], name="cat_name")
+            votables[key] = t
+        
+        return votables
+    
 
     def catsHTM_redshift(self, oid, radius):
         'get redshift given oid using catsHTM crossmatch'
@@ -185,10 +293,10 @@ class alerce_api(object):
         if candid is None:
             candid = min(self.get_detections(oid).index)
             
-        print(oid, candid)
         science = "http://avro.alerce.online/get_stamp?oid=%s&candid=%s&type=science&format=png" % (oid, candid)
         images="""
-        &emsp;&emsp;&emsp;&emsp;&emsp;
+        <div>ZTF oid: %s, candid: %s</div>
+        <div>&emsp;&emsp;&emsp;&emsp;&emsp;
         Science
         &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp; 
         Template
@@ -199,5 +307,5 @@ class alerce_api(object):
         <div style="float:left;width:20%%"><img src="%s"></div>
         <div style="float:left;width:20%%"><img src="%s"></div>
         </div>
-        """ % (science, science.replace("science", "template"), science.replace("science", "difference"))
+        """ % (oid, candid, science, science.replace("science", "template"), science.replace("science", "difference"))
         display(HTML(images))

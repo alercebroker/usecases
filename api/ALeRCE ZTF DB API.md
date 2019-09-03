@@ -1,5 +1,5 @@
 # ALeRCE ZTF DB API
-This API give access to ALeRCE Annotated ZTF API, with corrected magnitudes, objects statistics and the object data.
+This API gives access to ALeRCE Annotated ZTF API, with corrected magnitudes, objects statistics and the object data.
 
 The access point to the API is [ztf.alerce.online], querying the API is done with **http POST requests**  with parameters in **JSON** format.
 

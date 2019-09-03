@@ -18,7 +18,7 @@ class AlerceOidError(Exception):
 class AlerceOidError(Exception):
     pass
 
-class alerce_api(object):
+class AlerceAPI(object):
     'ALeRCE API python wrapper class'
     
     # init

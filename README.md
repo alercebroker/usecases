@@ -7,7 +7,7 @@ See more information about the ALeRCE broker, including its frontend, in [http:/
 
 A collection of jupyter notebooks and scripts on how to access the ALeRCE database, API, etc.
 
-For faster cloning please use: `git clone --depth=1 git@github.com:alercebroker/usecases.git`
+For faster cloning please use: `git clone --depth=1 https://github.com/alercebroker/usecases.git`
 
 ## Context
 

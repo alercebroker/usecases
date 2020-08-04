@@ -1,4 +1,4 @@
-<img src="https://alerce-science.s3.amazonaws.com/images/fullAlerceWHITE.max-1920x200.png" width="300">
+<img src="alerce_logo_rgb_01.png" width="300">
 
 See more information about the ALeRCE broker, including its frontend, in [http://alerce.science/](http://alerce.science/)
 

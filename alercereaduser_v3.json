@@ -1,0 +1,8 @@
+{
+    "params" : {
+        "dbname" : "new_pipeline_ts",
+        "user" : "alerceread",
+        "host": "13.58.88.2",
+        "password" : "alerce2020"
+    }
+}

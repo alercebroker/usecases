@@ -1,4 +1,4 @@
-<img src="http://alerce.science/wp-content/uploads/2017/08/CM-768x302.png" width="300">
+<img src="alerce_logo_rgb_01.png" width="300">
 
 See more information about the ALeRCE broker, including its frontend, in [http://alerce.science/](http://alerce.science/)
 
@@ -19,7 +19,11 @@ ALeRCE aims to facilitate the study of stationary (non--moving) variable and tra
 
 ## This repository
 
-In this repository we show how to access the ALeRCE ZTF database, focused on different science cases. You can find several introductory jupyter notebooks in the [notebooks](https://github.com/alercebroker/usecases/tree/master/notebooks) directory, which connect to the database, query some tables and does some processing and visualization of the data. If you would like to beta test this please note that ALeRCE is still under development, with very simple taxonomy and classification models. Please report any problems to francisco dot forster at gmail dot com.
+In this repository we show how to access the ALeRCE ZTF database, focused on different science cases. You can find several introductory jupyter notebooks in the [notebooks](https://github.com/alercebroker/usecases/tree/master/notebooks) directory, which connect to the database, query some tables and does some processing and visualization of the data. If you would like to beta test this please note that ALeRCE is still under development, with very simple taxonomy and classification models.
+
+***LSST PCW 2020: note that we are undergoing major changes in our database design and we are beta releasing some notebooks which use this new API, which is much richer than our stable version. These notebooks have the "newDB" string on them.***
+
+Please report any problems to francisco dot forster at gmail dot com.
 
 ## How can I contribute?
 

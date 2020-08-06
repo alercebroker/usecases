@@ -1,8 +1,6 @@
-<img src="alerce_logo_rgb_01.png" width="300">
-
 # Available notebooks
 
-##LSST PCW 2020: preview the new database, API and client (feedback welcome!)
+## LSST PCW 2020: preview the new database, API and client (feedback welcome!)
 
 * ALeRCE_ZTF_Supernova_newDB.ipynb: supernova science case notebook
 
@@ -14,7 +12,7 @@
 
 * ALeRCE_light_curve_classifier.ipynb: using the light curve classifier
 
-##Production database (soon to be replaced)
+## Production database (soon to be replaced)
 
 * ALeRCE_ZTF_Supernova.ipynb: supernova science case notebook
 

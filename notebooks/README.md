@@ -4,9 +4,9 @@
 
 * ALeRCE_ZTF_Supernova_newDB.ipynb: supernova science case notebook
 
-* ALeRCE_ZTF_VariableStars_newDB.ipynb: AGN science case notebook
+* ALeRCE_ZTF_VariableStars_newDB.ipynb: variable stars science case notebook
 
-* ALeRCE_ZTF_ActiveGalaxies_newDB.ipynb: variable stars science case notebook
+* ALeRCE_ZTF_ActiveGalaxies_newDB.ipynb: AGN science case notebook
 
 * ALeRCE_ZTF_Stamp_Classifier.ipynb: using the stamp classifier
 

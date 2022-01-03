@@ -1,4 +1,4 @@
-ALeRCE Tutorial Workshop - 23,24 September 2020
+# ALeRCE Tutorial Workshop - 23,24 September 2020
 
 This was a two-day workshop with the aim of learning how to use the tools by the ALeRCE broker, as well as to learn to code a notebook focused on your own science case.
 

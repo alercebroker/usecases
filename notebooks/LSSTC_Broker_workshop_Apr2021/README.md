@@ -1,11 +1,15 @@
-# ALeRCE notebooks for the LSSTC Broker Workshop 2021
+# ALeRCE notebooks for the LSSTC Broker Workshop 2021 - 13,14,15 April 2021
 
-Google colab links:
+The notebooks were presented in the LSSTC Broker Workshop 2021 (Part II) as part of the ALeRCE Broker presentations. During this workshop, ~70% tutorials and demos were focused on science cases and interfaces (filtering, machine-learning classifications and cross-matches, multi-messenger/wavelength analyses, APIs, batch processing). A very small number of talks on topics like LSST DR0 & cadence, ZTF II, PLAsTiCC 2, TOMs.
 
-* [Extragalactic Science](https://colab.research.google.com/github/alercebroker/usecases/blob/master/notebooks/LSSTC_Broker_workshop/ALeRCE_Extragalactic_notebook_brokers_workshop_2021.ipynb)
+* [LSSTC Enabling Science 2021 Broker Workshop Part II](http://workshops.alerce.online/lsstc-enabling-science-2020-broker-workshop-part-ii/)
 
-* [Galactic Science](https://colab.research.google.com/github/alercebroker/usecases/blob/master/notebooks/LSSTC_Broker_workshop/ALeRCE_Galactic_notebook_brokers_workshop_2021.ipynb)
+Available material for all the brokers involved in this workshop is available at:
 
-* [Solar System](https://colab.research.google.com/github/alercebroker/usecases/blob/master/notebooks/LSSTC_Broker_workshop/ALeRCE_SolarSystem_notebook_brokers_workshop_2021.ipynb)
+* [Broker Workshop 2021 Tutorials](https://github.com/broker-workshop/tutorials)
 
-* [Training sets and validation](https://colab.research.google.com/github/alercebroker/usecases/blob/master/notebooks/LSSTC_Broker_workshop/ALeRCE_Training_sets_notebook_brokers_workshop_2021.ipynb)
+The full list of recorded talks can be found in the following link:
+
+[Link to Youtube channel](https://www.youtube.com/playlist?list=PLFA428AMRhwADMFsNDC1dttTyIukPhADi)
+
+The ALeRCE notebooks work in Google Colab and the pipeline that was used is alercereaduser_v4.json

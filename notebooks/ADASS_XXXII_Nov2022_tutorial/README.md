@@ -1,6 +1,6 @@
 # ADASS XXXII ALeRCE tutorial
 
-Welcome to the ALeRCE tutorial github page. For a detailed explanation of the tutorial, see https://alerce.science/alerce-adass-tutorial-2022/.
+Welcome to the ALeRCE tutorial github page. For a detailed explanation of the tutorial, see https://alerce.science/alerce-adass-tutorial-2022/. Also, see the accompanying slides [here](https://docs.google.com/presentation/d/1sATyMXlXBEUHwfjHzWAXpYroWF98WgkQdqM4mOG3WDk/edit?usp=sharing).
 
 ## List of Notebooks:
 

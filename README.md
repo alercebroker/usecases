@@ -15,13 +15,11 @@ The ALeRCE broker is a Chilean-led initiative to build a community broker for LS
 
 ## Scientific aim
 
-ALeRCE aims to facilitate the study of stationary (non--moving) variable and transient objects. We will do this by providing real-time filtered streams of aggregated, annotated and classified alerts, but also by providing alert exploration and analysis tools that can help researchers look for patterns and outliers within large populations of events. We also aim to provide forecasting tools which can help with the optimization of follow--up resources.
+ALeRCE aims to facilitate the study of variable and transient objects. We will do this by providing real-time filtered streams of aggregated, annotated and classified alerts, but also by providing alert exploration and analysis tools that can help researchers look for patterns and outliers within large populations of events. We also aim to provide forecasting tools which can help with the optimization of follow--up resources.
 
 ## This repository
 
-In this repository we show how to access the ALeRCE ZTF database, focused on different science cases. You can find several introductory jupyter notebooks in the [notebooks](https://github.com/alercebroker/usecases/tree/master/notebooks) directory, which connect to the database, query some tables and does some processing and visualization of the data. If you would like to beta test this please note that ALeRCE is still under development, with very simple taxonomy and classification models.
-
-***LSST PCW 2020: note that we are undergoing major changes in our database design and we are beta releasing some notebooks which use this new API, which is much richer than our stable version. These notebooks have the "newDB" string on them.***
+In this repository we show how to access the ALeRCE ZTF database, focused on different science cases. You can find several introductory jupyter notebooks in the [notebooks](https://github.com/alercebroker/usecases/tree/master/notebooks) directory, which connect to the database, query some tables and does some processing and visualization of the data.
 
 Please report any problems to francisco dot forster at gmail dot com.
 

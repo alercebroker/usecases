@@ -99,36 +99,26 @@ lc_sizes = {
         "i": 40,
     },
     1: {
-        "u": 50,
-        "g": 40,
-        "r": 60,
-        "i": 50,
-        "z": 40,
-        "y": 70,
+        "u": 30,
+        "g": 20,
+        "r": 40,
+        "i": 30,
+        "z": 20,
+        "y": 50,
     },
     2: {
-        "u": 50,
-        "g": 40,
-        "r": 60,
-        "i": 50,
-        "z": 40,
-        "y": 70,
+        "u": 30,
+        "g": 20,
+        "r": 40,
+        "i": 30,
+        "z": 20,
+        "y": 50,
     },
 }
-# lc_sizes = {
-#    1: {
-#        'u': 60,
-#        'g': 60,
-#        'r': 60,
-#        'i': 60,
-#        'z': 60,
-#        'y': 60,
-#    }
-# }
 lc_sizes_forced = {
-    0: {key: val - 20 for key, val in lc_sizes[0].items()},
-    1: {key: val - 20 for key, val in lc_sizes[1].items()},
-    2: {key: val - 20 for key, val in lc_sizes[2].items()},
+    0: {key: val - 15 for key, val in lc_sizes[0].items()},
+    1: {key: val - 15 for key, val in lc_sizes[1].items()},
+    2: {key: val - 15 for key, val in lc_sizes[2].items()},
 }
 
 # Jan 1 from 2023 to 2027

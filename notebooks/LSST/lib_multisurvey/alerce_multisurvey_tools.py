@@ -44,9 +44,6 @@ sid_map_cols = {
         "flux_sci_err": "fluxsci_err_nJy",
     },
     1: {
-        #'oid': 'diaObjectId',
-        #'candid': 'diaSourceId',
-        #'mjd': 'midpointMjdTai',
         "oid": "oid",
         "candid": "measurement_id",
         "ssid": "ssObjectId",
@@ -59,9 +56,6 @@ sid_map_cols = {
         "flux_sci_err": "scienceFluxErr",
     },
     2: {
-        #'oid': 'diaObjectId',
-        #'candid': 'diaSourceId',
-        #'mjd': 'midpointMjdTai',
         "oid": "oid",
         "candid": "measurement_id",
         "ssid": "ssObjectId",

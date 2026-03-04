@@ -13,9 +13,6 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from astropy.wcs import WCS
 import sys
-from alerce.core import Alerce
-
-alerce_client = Alerce()
 
 
 sid_num2str = {
@@ -268,6 +265,7 @@ def plot_stamps(
 
 
 def query_stamps(
+    client=None,
     df_objs=None,
     survey="lsst",
     sid=1,
@@ -290,8 +288,9 @@ def query_stamps(
         # print(params)
 
         try:
-            stamps = alerce_client.get_stamps(
-                **params, include_variance_and_psf=include_variance_and_psf
+            stamps = client.get_stamps(
+                **params,
+                include_variance_and_psf=include_variance_and_psf
             )
             # print(stamps)
         except:

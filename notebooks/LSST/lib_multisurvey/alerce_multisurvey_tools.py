@@ -3,7 +3,8 @@
 #
 # Based on many notebooks by the ALeRCE collaboration
 #
-# Functions for plotting light curves and stamps
+# Definitions for survey-related properties, and functions for plotting light
+# curves and stamps
 
 
 import pandas as pd
@@ -12,16 +13,103 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from astropy.wcs import WCS
 import sys
-
-import alerce_mappings as am
-
-
-client_path = "/home/ammunoz1/Desktop/Astro2025/ALeRCE/alercebroker/alerce_client/"
-sys.path.append(client_path)
 from alerce.core import Alerce
 
 alerce_client = Alerce()
 
+
+sid_num2str = {
+    0: "ZTF",
+    1: "LSST diaObject",
+    2: "LSST ssObject",
+}
+
+sid_survey = {
+    0: "ZTF",
+    1: "LSST",
+    2: "LSST",
+}
+
+sid_map_cols = {
+    0: {
+        "oid": "oid",
+        "candid": "candid",
+        "ssid": "ssnamenr",
+        "sscandid": "candid",
+        "mjd": "mjd",
+        "band": "band",
+        "flux_diff": "fluxdiff_nJy",
+        "flux_diff_err": "fluxdiff_err_nJy",
+        "flux_sci": "fluxsci_nJy",
+        "flux_sci_err": "fluxsci_err_nJy",
+    },
+    1: {
+        #'oid': 'diaObjectId',
+        #'candid': 'diaSourceId',
+        #'mjd': 'midpointMjdTai',
+        "oid": "oid",
+        "candid": "measurement_id",
+        "ssid": "ssObjectId",
+        "sscandid": "ssSourceId",
+        "mjd": "mjd",
+        "band": "band_name",
+        "flux_diff": "psfFlux",
+        "flux_diff_err": "psfFluxErr",
+        "flux_sci": "scienceFlux",
+        "flux_sci_err": "scienceFluxErr",
+    },
+    2: {
+        #'oid': 'diaObjectId',
+        #'candid': 'diaSourceId',
+        #'mjd': 'midpointMjdTai',
+        "oid": "oid",
+        "candid": "measurement_id",
+        "ssid": "ssObjectId",
+        "sscandid": "ssSourceId",
+        "mjd": "mjd",
+        "band": "band_name",
+        "flux_diff": "psfFlux",
+        "flux_diff_err": "psfFluxErr",
+        "flux_sci": "scienceFlux",
+        "flux_sci_err": "scienceFluxErr",
+    },
+}
+
+sid_bands = {
+    0: ["g", "r", "i"],
+    1: ["u", "g", "r", "i", "z", "y"],
+    2: ["u", "g", "r", "i", "z", "y"],
+}
+
+sid_map_bands = {
+    0: {1: "g", 2: "r", 3: "i"},
+    1: {6: "u", 1: "g", 2: "r", 3: "i", 4: "z", 5: "y"},
+    2: {6: "u", 1: "g", 2: "r", 3: "i", 4: "z", 5: "y"},
+}
+
+sid_map_cols_forced2det = {
+    0: {
+        "mag": "magpsf",
+        "e_mag": "sigmapsf",
+        "mag_corr": "magpsf_corr",
+        "e_mag_corr_ext": "sigmapsf_corr_ext",
+    },
+}
+
+image_subtypes = [
+    "Science",
+    "Template",
+    "Difference",
+]
+
+# Only for LSST
+image_planes = ["flux", "variance", "psf"]
+
+tables_epochs = [
+    "detections",
+    "forced_photometry",
+    # "non_detections",
+]
 
 lc_colors = {
     0: {
@@ -129,28 +217,9 @@ yr = pd.DataFrame(mjd_jan1, columns=["mjd_jan1"])
 yr["label"] = np.array(range(year_i, year_f + 1)).astype(str)
 
 
-def plot_stamps_fromapi(df_objs=None, survey="lsst", sid=1):
-    df = pd.DataFrame()
-
-    col_id = am.sid_map_cols[sid]["oid"]
-    col_candid = am.sid_map_cols[sid]["candid"]
-
-    for i, (oid, candid) in enumerate(zip(df_objs.index.tolist(), df_objs[col_candid])):
-        # print(i, oid, candid)
-
-        params = {
-            "survey": survey,
-            col_id: str(oid),
-            col_candid: str(candid),
-        }
-        # print(params)
-
-        stamps = alerce_client.plot_stamps(**params)
-
-
 def plot_stamps(
     row,
-    imtypes=am.image_subtypes,
+    imtypes=image_subtypes,
     plane="flux",
     title="",
     use_wcs=False,
@@ -208,16 +277,15 @@ def query_stamps(
     df_objs=None,
     survey="lsst",
     sid=1,
-    imtypes=am.image_subtypes,
-    include_variance_and_mask=False
+    imtypes=image_subtypes,
+    include_variance_and_psf=False,
 ):
     df = pd.DataFrame()
 
-    col_id = am.sid_map_cols[sid]["oid"]
-    col_candid = am.sid_map_cols[sid]["candid"]
+    col_id = sid_map_cols[sid]["oid"]
+    col_candid = sid_map_cols[sid]["candid"]
 
-    for i, (oid, candid) in enumerate(zip(df_objs.index.tolist(),
-                                          df_objs[col_candid])):
+    for i, (oid, candid) in enumerate(zip(df_objs.index.tolist(), df_objs[col_candid])):
         # print(i, oid, candid)
 
         params = {
@@ -229,7 +297,7 @@ def query_stamps(
 
         try:
             stamps = alerce_client.get_stamps(
-                **params, include_variance_and_mask=include_variance_and_mask
+                **params, include_variance_and_psf=include_variance_and_psf
             )
             # print(stamps)
         except:
@@ -242,7 +310,7 @@ def query_stamps(
         # print(stamps)
 
         planes = (
-            am.image_planes
+            image_planes
             if isinstance(stamps["cutout" + imtypes[0]], list)
             else ["flux"]
         )
@@ -293,13 +361,14 @@ def limit_epochs(d_objs=None, mjd_lims=None):
     d_objs = d_objs.copy()
 
     for sid in d_objs.keys():
-        col_mjd_this = am.sid_map_cols[sid]["mjd"]
+        col_mjd_this = sid_map_cols[sid]["mjd"]
 
         for oid in d_objs[sid].keys():
             for level in ["detections", "forced_photometry", "non_detections"]:
                 if len(d_objs[sid][oid][level]) > 0:
-                    mask = (d_objs[sid][oid][level][col_mjd_this] >= mjd_lims[0]) \
-                        & (d_objs[sid][oid][level][col_mjd_this] <= mjd_lims[1])
+                    mask = (d_objs[sid][oid][level][col_mjd_this] >= mjd_lims[0]) & (
+                        d_objs[sid][oid][level][col_mjd_this] <= mjd_lims[1]
+                    )
                     d_objs[sid][oid][level] = d_objs[sid][oid][level][mask].copy()
 
     return d_objs
@@ -358,7 +427,7 @@ def init_lc_kwargs():
     keys = ["z_obj", "folded_period"]
     for key in keys:
         lc_kwargs[key] = np.nan
-    
+
     keys = ["cosmo"]
     for key in keys:
         lc_kwargs[key] = None
@@ -377,8 +446,7 @@ def init_lc_kwargs():
 # TODO: add low-S/N forced photometry epochs as upper limits in plot
 # TODO: check if absolute magnitude plots work
 def plot_lc(
-    d_objs={}, mjd_lims=None, y_lims=None, lc_params={}, title_exts="",
-    namefig=None
+    d_objs={}, mjd_lims=None, y_lims=None, lc_params={}, title_exts="", namefig=None
 ):
     lc_params_default = {
         "from_tap": False,
@@ -433,17 +501,16 @@ def plot_lc(
     i = 0
 
     for sid in d_objs.keys():
-        bands = am.sid_bands[sid]
-        col_band = am.sid_map_cols[sid]["band"]
-        col_mjd = am.sid_map_cols[sid]["mjd"]
+        bands = sid_bands[sid]
+        col_band = sid_map_cols[sid]["band"]
+        col_mjd = sid_map_cols[sid]["mjd"]
         colors = lc_colors[sid]
         markers = lc_markers[sid]
         sizes = lc_sizes[sid]
         sizes_forced = lc_sizes_forced[sid]
 
         for oid in d_objs[sid].keys():
-            title = am.sid_num2str[sid] + ", " + am.sid_map_cols[sid]["oid"] \
-                    + "=" + str(oid)
+            title = sid_num2str[sid] + ", " + sid_map_cols[sid]["oid"] + "=" + str(oid)
 
             df_dets = d_objs[sid][oid]["detections"].copy()
 
@@ -469,9 +536,9 @@ def plot_lc(
 
                 ax_i = plt.subplot(gs[i])
 
-                col_y = am.sid_map_cols[sid]["flux_" + light_type]
-                col_yerr = am.sid_map_cols[sid]["flux_" + light_type + "_err"]
-                
+                col_y = sid_map_cols[sid]["flux_" + light_type]
+                col_yerr = sid_map_cols[sid]["flux_" + light_type + "_err"]
+
                 if sid != 0 and from_tap:
                     col_y = col_y.lower()
                     col_yerr = col_yerr.lower()

@@ -437,9 +437,9 @@ def init_lc_kwargs():
 
 # TODO: add non_detections in plot
 # TODO: add low-S/N forced photometry epochs as upper limits in plot
-# TODO: check if absolute magnitude plots work
 def plot_lc(
-    d_objs={}, mjd_lims=None, y_lims=None, lc_params={}, title_exts="", namefig=None
+    d_objs={}, mjd_lims=None, y_lims=None, lc_params={}, title_exts="",
+    namefig=None, use_1panel=False
 ):
     lc_params_default = {
         "from_tap": False,
@@ -543,6 +543,10 @@ def plot_lc(
                             y = df_dets[col_y][mask]
                             yerr = df_dets[col_yerr][mask]
                         else:
+                            if len(df_dets[mask][
+                                df_dets[col_y][mask].notna()
+                                ]) == 0:
+                                continue
                             y = fluxnjy2mag(df_dets[col_y][mask])
                             yerr = flux_err_2_mag_err(
                                 df_dets[col_yerr][mask], df_dets[col_y][mask].abs()
@@ -618,6 +622,10 @@ def plot_lc(
                                 y = df_forced[col_y][mask]
                                 yerr = df_forced[col_yerr][mask]
                             else:
+                                if len(df_forced[mask][
+                                    df_forced[col_y][mask].notna()
+                                    ]) == 0:
+                                    continue
                                 y = fluxnjy2mag(df_forced[col_y][mask])
                                 yerr = flux_err_2_mag_err(
                                     df_forced[col_yerr][mask],
@@ -714,6 +722,361 @@ def plot_lc(
                 ax_i.legend(loc="center left", bbox_to_anchor=(1, 0.5))
 
                 i += 1
+
+    if mjd_lims is not None:
+        for j in fig.axes:
+            j.set_xlim([mjd_min, mjd_max])
+    else:
+        xlims = []
+        for j in fig.axes:
+            xlims = np.append(xlims, j.get_xlim())
+        xlim1 = min(xlims)
+        xlim2 = max(xlims)
+        for j in fig.axes:
+            j.set_xlim([xlim1, xlim2])
+
+    if y_lims is not None:
+        for j in fig.axes:
+            j.set_ylim(y_lims)
+
+    if show_yr and not use_folded:
+        for j in fig.axes:
+            xlims = j.get_xlim()
+            ylims = j.get_ylim()
+            y_yr = (ylims[1] - ylims[0]) * 0.93 + ylims[0]
+
+            mask = (yr["mjd_jan1"] >= xlims[0] - 365.0) & (yr["mjd_jan1"] <= xlims[1])
+
+            for x_yr, label_yr in zip(yr["mjd_jan1"][mask], yr["label"][mask]):
+                j.axvline(
+                    x=x_yr, color="black", linestyle=":", linewidth=0.7, alpha=0.5
+                )
+                j.text(
+                    x_yr + 0.5 * 365.0,
+                    y_yr,
+                    label_yr,
+                    alpha=0.4,
+                    clip_on=True,
+                    horizontalalignment="center",
+                    fontsize="small",
+                )
+
+                j.set_xlim(xlims)
+
+    fig.tight_layout()
+
+    if namefig is not None:
+        fig.savefig(namefig, bbox_inches="tight")
+
+    if fontsize is not None:
+        plt.rcParams.update({"font.size": 12})
+
+
+# TODO: add non_detections in plot
+# TODO: add low-S/N forced photometry epochs as upper limits in plot
+def plot_lc_1panel(
+    d_objs={}, mjd_lims=None, y_lims=None, lc_params={}, title_exts="",
+    namefig=None, use_1panel=False
+):
+    lc_params_default = {
+        "from_tap": False,
+        "use_mag": False,
+        "use_flux": True,
+        "show_yr": False,
+        "figwidth": 9,
+        "pheight": 3.5,
+        "fontsize": None,
+        "alpha": 0.7,
+        "alpha_forced": 0.5,
+        "offset_mjd": 5.0,
+    }
+    lc_params = lc_params.copy()
+    for param in lc_params_default.keys():
+        if param not in lc_params.keys():
+            lc_params[param] = lc_params_default[param]
+
+    from_tap = lc_params["from_tap"]
+    use_mag = lc_params["use_mag"]
+    use_flux = lc_params["use_flux"]
+    show_yr = lc_params["show_yr"]
+    figwidth = lc_params["figwidth"]
+    pheight = lc_params["pheight"]
+    fontsize = lc_params["fontsize"]
+    alpha = lc_params["alpha"]
+    alpha_forced = lc_params["alpha_forced"]
+    offset_mjd = lc_params["offset_mjd"]
+
+    if fontsize is not None:
+        plt.rcParams.update({"font.size": fontsize})
+
+    d_objs = d_objs.copy()
+
+    if mjd_lims is not None:
+        d_objs = limit_epochs(d_objs=d_objs, mjd_lims=mjd_lims)
+
+    nrows = 0
+
+    level = "detections"
+    show_diff = False
+    show_sci = False
+    for sid in d_objs.keys():
+        for oid in d_objs[sid].keys():
+            if len(d_objs[sid][oid][level]) > 0:
+                if d_objs[sid][oid]["lc_kwargs"]["show_diff"]:
+                    show_diff = True
+                if d_objs[sid][oid]["lc_kwargs"]["show_sci"]:
+                    show_sci = True
+    
+    light_types = []
+    if show_diff:
+        nrows += 1
+        light_types += ["diff"]
+    if show_sci:
+        nrows += 1
+        light_types += ["sci"]
+
+    fig = plt.figure(figsize=(figwidth, pheight * nrows))
+    gs = GridSpec(nrows=nrows, ncols=1, figure=fig)
+    
+    #title = " + ".join([sid_survey[x] + " " + ", ".join(
+    #    str(oid) for oid in d_objs[x].keys()
+    #    ) for x in d_objs.keys()])
+    title = " + ".join([", ".join(
+        str(oid) for oid in d_objs[x].keys()
+        ) for x in d_objs.keys()])
+
+    for i, light_type in enumerate(light_types):
+        ax_i = plt.subplot(gs[i])
+        
+        #title = " + ".join([sid_survey[x] for x in d_objs.keys()])
+        
+        for sid in d_objs.keys():
+            bands = sid_bands[sid]
+            col_band = sid_map_cols[sid]["band"]
+            col_mjd = sid_map_cols[sid]["mjd"]
+            colors = lc_colors[sid]
+            markers = lc_markers[sid]
+            sizes = lc_sizes[sid]
+            sizes_forced = lc_sizes_forced[sid]
+            
+            tag = sid_survey[sid]
+
+            for oid in d_objs[sid].keys():
+                #tag = sid_survey[sid] + " " + str(oid)
+
+                df_dets = d_objs[sid][oid]["detections"].copy()
+
+                if len(df_dets) == 0:
+                    continue
+
+                use_flux = d_objs[sid][oid]["lc_kwargs"]["show_flux"]
+                use_absmag = d_objs[sid][oid]["lc_kwargs"]["show_absolute_mag"]
+                use_folded = d_objs[sid][oid]["lc_kwargs"]["show_folded"]
+
+                z_obj = d_objs[sid][oid]["lc_kwargs"]["z_obj"]
+                cosmo = d_objs[sid][oid]["lc_kwargs"]["cosmo"]
+                period = d_objs[sid][oid]["lc_kwargs"]["folded_period"]
+
+                if use_absmag and ~np.isnan(z_obj):
+                    distmod = cosmo.distmod(z_obj).value
+
+                show_light_type = d_objs[sid][oid]["lc_kwargs"]["show_" + light_type]
+
+                if not show_light_type:
+                    continue
+
+                col_y = sid_map_cols[sid]["flux_" + light_type]
+                col_yerr = sid_map_cols[sid]["flux_" + light_type + "_err"]
+
+                if sid != 0 and from_tap:
+                    col_y = col_y.lower()
+                    col_yerr = col_yerr.lower()
+
+                for band in bands:
+                    mask = df_dets[col_band] == band
+                    if len(df_dets[mask]) > 0:
+                        if use_flux:
+                            y = df_dets[col_y][mask]
+                            yerr = df_dets[col_yerr][mask]
+                        else:
+                            if len(df_dets[mask][
+                                df_dets[col_y][mask].notna()
+                                ]) == 0:
+                                continue
+                            y = fluxnjy2mag(df_dets[col_y][mask])
+                            yerr = flux_err_2_mag_err(
+                                df_dets[col_yerr][mask], df_dets[col_y][mask].abs()
+                            )
+
+                            if use_absmag and z_obj is not None:
+                                y = absmag(y, distmod=distmod)
+
+                        if use_folded and period is not None:
+                            phase = np.mod(df_dets[col_mjd][mask], period) / period
+
+                            for nphase in [0, 1]:
+                                if nphase == 0:
+                                    label = "%s %s" % (tag, band)
+                                else:
+                                    label = None
+
+                                ax_i.errorbar(
+                                    phase + nphase,
+                                    y,
+                                    yerr=yerr,
+                                    alpha=alpha,
+                                    c=colors[band],
+                                    linestyle="None",
+                                )
+                                ax_i.scatter(
+                                    phase + nphase,
+                                    y,
+                                    s=sizes[band],
+                                    alpha=alpha,
+                                    c=colors[band],
+                                    marker=markers[band],
+                                    label=label,
+                                    linestyle="None",
+                                )
+                        else:
+                            ax_i.errorbar(
+                                df_dets[col_mjd][mask],
+                                y,
+                                yerr=yerr,
+                                alpha=alpha,
+                                c=colors[band],
+                                linestyle="None",
+                            )
+                            ax_i.scatter(
+                                df_dets[col_mjd][mask],
+                                y,
+                                s=sizes[band],
+                                alpha=alpha,
+                                c=colors[band],
+                                marker=markers[band],
+                                label="%s %s" % (tag, band),
+                                linestyle="None",
+                            )
+
+                if mjd_lims is None and len(df_dets[df_dets[col_y].notna()]) == 1:
+                    ax_i.set_xlim(
+                        [
+                            df_dets.iloc[0][col_mjd] - offset_mjd,
+                            df_dets.iloc[0][col_mjd] + offset_mjd,
+                        ]
+                    )
+
+                df_forced = d_objs[sid][oid]["forced_photometry"].copy()
+                use_forced = d_objs[sid][oid]["lc_kwargs"]["show_forced"]
+
+                if len(df_forced) > 0 and use_forced:
+                    #display(df_forced)
+                    for band in bands:
+                        mask = df_forced[col_band] == band
+                        if len(df_forced[mask]) > 0:
+                            if use_flux:
+                                y = df_forced[col_y][mask]
+                                yerr = df_forced[col_yerr][mask]
+                            else:
+                                if len(df_forced[mask][
+                                    df_forced[col_y][mask].notna()
+                                    ]) == 0:
+                                    continue
+                                y = fluxnjy2mag(df_forced[col_y][mask])
+                                yerr = flux_err_2_mag_err(
+                                    df_forced[col_yerr][mask],
+                                    df_forced[col_y][mask].abs(),
+                                )
+
+                                if use_absmag and z_obj is not None:
+                                    y = absmag(y, distmod=distmod)
+
+                            if use_folded and period is not None:
+                                phase = (
+                                    np.mod(df_forced[col_mjd][mask], period) / period
+                                )
+                                for nphase in [0, 1]:
+                                    if nphase == 0:
+                                        label = "%s %s (forced)" % (tag, band)
+                                    else:
+                                        label = None
+                                    ax_i.errorbar(
+                                        phase + nphase,
+                                        y,
+                                        yerr=yerr,
+                                        alpha=alpha,
+                                        c=colors[band],
+                                        linestyle="None",
+                                    )
+                                    ax_i.scatter(
+                                        phase + nphase,
+                                        y,
+                                        s=sizes_forced[band],
+                                        alpha=alpha,
+                                        c=colors[band],
+                                        marker=markers[band],
+                                        label=label,
+                                        linestyle="None",
+                                    )
+                            else:
+                                ax_i.errorbar(
+                                    df_forced[col_mjd][mask],
+                                    y,
+                                    yerr=yerr,
+                                    alpha=alpha,
+                                    c=colors[band],
+                                    linestyle="None",
+                                )
+                                ax_i.scatter(
+                                    df_forced[col_mjd][mask],
+                                    y,
+                                    s=sizes_forced[band],
+                                    alpha=alpha,
+                                    c=colors[band],
+                                    marker=markers[band],
+                                    label="%s %s (forced)" % (tag, band),
+                                    linestyle="None",
+                                )
+
+                if use_folded and ~np.isnan(period):
+                    ax_i.set_xlabel("Phase [days]")
+                else:
+                    ax_i.set_xlabel("MJD")
+
+                if use_flux:
+                    if light_type == "diff":
+                        ax_i.set_ylabel("Difference flux [nJy]")
+                    elif light_type == "sci":
+                        ax_i.set_ylabel("Science flux [nJy]")
+                    else:
+                        ax_i.set_ylabel("")
+                    title_aux = d_objs[sid][oid]["lc_kwargs"][
+                        "title_exts_flux_" + light_type
+                    ]
+                    ax_i.set_title(title + title_aux + title_exts)
+                    #ax_i.set_title(title_aux.replace(", ", "").capitalize() + title_exts)
+                else:
+                    if light_type == "diff":
+                        if use_absmag:
+                            ax_i.set_ylabel("Absolute magnitude (from difference flux)")
+                        else:
+                            ax_i.set_ylabel("Difference magnitude")
+                    elif light_type == "sci":
+                        if use_absmag:
+                            ax_i.set_ylabel("Absolute magnitude")
+                        else:
+                            ax_i.set_ylabel("Apparent magnitude")
+                    else:
+                        ax_i.set_ylabel("")
+                    title_aux = d_objs[sid][oid]["lc_kwargs"][
+                        "title_exts_mag_" + light_type
+                    ]
+                    ax_i.set_title(
+                        title + title_aux + title_exts + " (only positive fluxes shown)"
+                    )
+                ax_i.legend(loc="center left", bbox_to_anchor=(1, 0.5))
+        if not use_flux:
+            ax_i.set_ylim(ax_i.get_ylim()[::-1])
 
     if mjd_lims is not None:
         for j in fig.axes:
